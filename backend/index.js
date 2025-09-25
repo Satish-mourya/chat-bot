@@ -9,7 +9,7 @@ app.use(express.json());
 
 
 const ai = new GoogleGenAI({ api_key: process.env.GEMINI_API_KEY });
-app.post("/generate",async (req,res)=>{
+app.post("/",async (req,res)=>{
     try{
         const {prompt} =req.body;
         const response=await ai.models.generateContent({
