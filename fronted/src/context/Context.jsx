@@ -1,60 +1,57 @@
-import { createContext } from "react";
 import { useState } from "react";
-export const Context = createContext();
+import { Context } from "./Context";
 
-export const ContextProvider = (props) => {
-  const [input, setinput] = useState("");
-  const [recentpromt, setrecentprompt] = useState("");
-  const [prevprompts, setprevprompts] = useState([]);
-  const [showresult, setshowresult] = useState(false);
-  const [loading, setloading] = useState(false);
-  const [resultdata, setresultdata] = useState("");
-
-   
+export const ContextProvider = ({ children }) => {
+  const [input, setInput] = useState("");
+  const [recentPrompt, setRecentPrompt] = useState("");
+  const [prevPrompts, setPrevPrompts] = useState([]);
+  const [showResult, setShowResult] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [resultData, setResultData] = useState("");
 
   const onSent = async () => {
     try {
-      setresultdata("");
-      setloading(true);
-      setshowresult(true)
-      setrecentprompt(input)
-      setprevprompts(prev=>[...prev,input])
+      setResultData("");
+      setLoading(true);
+      setShowResult(true);
+      setRecentPrompt(input);
+      setPrevPrompts(prev => [...prev, input]);
 
-      const response = await fetch("https://chat-bot-backend-cfrj.onrender.com", {
+      const response = await fetch("https://chat-bot-backend-cfrj.onrender.com/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt:input }),
+        body: JSON.stringify({ prompt: input }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
       const data = await response.json();
       console.log(data.result);
-      setresultdata(data.result);
-      setloading(false);
-      setinput("");
+
+      setResultData(data.result);
+      setInput("");
     } catch (err) {
-      console.error(err);
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  
-  
-
   const contextValue = {
-    input,
-    setinput,
-    recentpromt,
-    setrecentprompt,
-    prevprompts,
-    setprevprompts,
-    showresult,
-    setshowresult,
-    loading,
-    setloading,
-    resultdata,
-    setresultdata,
+    input, setInput,
+    recentPrompt, setRecentPrompt,
+    prevPrompts, setPrevPrompts,
+    showResult, setShowResult,
+    loading, setLoading,
+    resultData, setResultData,
     onSent
   };
 
   return (
-    <Context.Provider value={contextValue}>{props.children}</Context.Provider>
+    <Context.Provider value={contextValue}>
+      {children}
+    </Context.Provider>
   );
 };
